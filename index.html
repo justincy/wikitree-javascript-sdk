@@ -88,8 +88,8 @@ logged_in {
 </style>
 
 <!-- For convenience, use JQuery for our Ajax interactions with the API. Use the cookie module to grab any existing user id. --> 
-<script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
-<script src="jquery.cookie.js"></script>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
 <script src="wikitree.js"></script>
 
 <script type="text/javascript">
@@ -134,50 +134,46 @@ function walk(user_id) {
 	}
 
 	// Go get the person data. 
-	var p = new wikitree.Person( { user_id: user_id } );
-	p.load({ fields: 'Id,Name,FirstName,MiddleName,LastNameAtBirth,LastNameCurrent,BirthDate,DeathDate,Father,Mother,Parents,Children'}).then(function(data){
-		// Raw JSON results dumped to display div
-		$('#raw').html("<h2>Raw Results</h2>\n<pre>"+JSON.stringify(data, null, 4)+"</pre>");
+  var fields = 'Id,Name,FirstName,MiddleName,LastNameAtBirth,LastNameCurrent,BirthDate,DeathDate,Father,Mother,Parents,Children';
+	wikitree.getPerson(user_id, fields)
+    .done(function(person){;
+      // Raw JSON results dumped to display div
+      $('#raw').html("<h2>Raw Results</h2>\n<pre>"+JSON.stringify(person, null, 4)+"</pre>");
 
-		//<h2 id="walk_name"></h2>
-		$('#walk_name').html( p.FirstName + ' ' + p.LastNameCurrent );
+      //<h2 id="walk_name"></h2>
+      $('#walk_name').html( person.getDisplayName() );
 
-		//Father: <span id="walk_father"></span><br>
-		if (p.Parents[p.Father]) { 
-			var f = p.Parents[p.Father];
-			$('#walk_father').html( "<span class='pseudo_link' onClick='walk("+f.Id+");'>"+f.FirstName + ' ' + f.LastNameCurrent+"</span>" );
-		} else { 
-			$('#walk_father').html('');
-		}
+      //Father: <span id="walk_father"></span><br>
+      var father = person.getFather();
+      $('#walk_father').html('');
+      if (father) { 
+        $('#walk_father').html( "<span class='pseudo_link' onClick='walk("+father.getId()+");'>"+father.getDisplayName()+"</span>" );
+      }
 
-		//Mother: <span id="walk_mother"></span><br>
-		if (p.Parents[p.Mother]) { 
-			var m = p.Parents[p.Mother];
-			$('#walk_mother').html( "<span class='pseudo_link' onClick='walk("+m.Id+");'>"+m.FirstName + ' ' + m.LastNameCurrent+"</span>" );
-		} else {
-			$('#walk_mother').html('');
-		}
+      //Mother: <span id="walk_mother"></span><br>
+      var mother = person.getMother();
+      $('#walk_mother').html('');
+      if (mother) { 
+        $('#walk_mother').html( "<span class='pseudo_link' onClick='walk("+mother.getId()+");'>"+mother.getDisplayName()+"</span>" );
+      }
 
-		//Children: <span id="walk_children"></span><br>
-		if (p.Children) { 
-			var html = '';
-			for (cid in p.Children) { 
-				var c = p.Children[cid];	
-				if (html != '') { html += ' / '; }
-				html += "<span class='pseudo_link' onClick='walk("+c.Id+");'>"+c.FirstName + ' ' + c.LastNameCurrent+"</span>";
-			}
-			$('#walk_children').html(html);
-		} else { 
-			$('#walk_mother').html('');
-		}
+      //Children: <span id="walk_children"></span><br>
+      var children = person.getChildren();
+      $('#walk_children').html('');
+      if (children) { 
+        for(var c in children) { 
+          var child = children[c];
+          $('#walk_children').append("<span class='pseudo_link' onClick='walk("+child.getId()+");'>"+child.getDisplayName()+"</span>");
+        }
+      }
 
-	});
+    });
 }
 
 // Log the user out of apps.wikitree.com by deleting all the cookies
 function appsLogout() { 
 	wikitree.session.logout();
-	document.location.href = 'http://apps.wikitree.com/apps/casey1/wikitree-javascript-sdk/';
+	document.location.reload(true);
 }
 </script>
 

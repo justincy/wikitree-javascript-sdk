@@ -4,7 +4,8 @@
   "description": "JavaScript SDK for the WikiTree API",
   "main": "wikitree.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "browserify lib/wikitree.js -s wikitree -o wikitree.js"
   },
   "repository": {
     "type": "git",
@@ -15,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/justincy/wikitree-javascript-sdk/issues"
   },
-  "homepage": "https://github.com/justincy/wikitree-javascript-sdk"
+  "homepage": "https://github.com/justincy/wikitree-javascript-sdk",
+  "devDependencies": {
+    "browserify": "10.0.0"
+  }
 }
