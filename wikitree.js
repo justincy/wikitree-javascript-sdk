@@ -1,198 +1,275 @@
-/* ======================================================================
- *
- *
- *
- *
- * ======================================================================
- */
+!function(){
 
+  var wikitree = window.wikitree = window.wikitree || {};
+  wikitree.API_URL = '/api.php';
 
-window.wikitree = window.wikitree || {};
-wikitree.API_URL = '/api.php';
+  /*========
+   * Session
+   *========*/
 
+  wikitree.Session = function(opts) {
+    this.user_id    = (opts && opts.user_id) ? opts.user_id : $.cookie('wikitree_wtb_UserID');
+    this.user_name  = (opts && opts.user_name) ? opts.user_name : $.cookie('wikitree_wtb_UserName');
+    this.loggedIn  = false;
+  };
+    
+  /**
+   * Define new method for Session objects to check the current login.
+   * Return a promise object (from our .ajax() call) so we can do things when this resolves.
+   */
+  wikitree.Session.prototype.checkLogin = function (opts){
 
-/* ======================================================================
- *
- * Session
- *
-/* ======================================================================
- */
+    var self = this;
 
+    if (opts && opts.user_id) { self.user_id = opts.user_id; }
+    if (opts && opts.user_name) { self.user_name = opts.user_name; }
+    
+    var data = { 'action': 'login', 'user_id': self.user_id };
+    var request = wikitree._ajax(data);
 
-// Create functional object "class" 
-wikitree.Session = function(opts) {
-	this.user_id    = (opts && opts.user_id) ? opts.user_id : $.cookie('wikitree_wtb_UserID');
-	this.user_name  = (opts && opts.user_name) ? opts.user_name : $.cookie('wikitree_wtb_UserName');
-	this.loggedIn  = false;
-};
-	
-// Define new method for Session objects to check the current login.
-// Return a promise object (from our .ajax() call) so we can do things when this resolves.
-wikitree.Session.prototype.checkLogin = function (opts){
+    request
+      // Local success handling to set our cookies.
+      .done(function(data) {        
+        if (data.login.result == self.user_id) { 
+          $.cookie('wikitree_wtb_UserID', self.user_id);
+          $.cookie('wikitree_wtb_UserName', self.user_name);
+          self.loggedIn = true;
+        } else { 
+          $.cookie('wikitree_wtb_UserID', '');
+          $.cookie('wikitree_wtb_UserName', '');
+          self.loggedIn = false;
+        }
+      })
+      .fail(function(xhr, status) { 
+        $.cookie('wikitree_wtb_UserID', '');
+        $.cookie('wikitree_wtb_UserName', '');
+        self.loggedIn = false;
+      });
 
-	var self = this;
+    return request;
 
-	if (opts && opts.user_id) { self.user_id = opts.user_id; }
-	if (opts && opts.user_name) { self.user_name = opts.user_name; }
+  }
+    
+  /**
+   * Do an actual login through the server API with an Ajax call. 
+   */
+  wikitree.Session.prototype.login = function(opts) {
+    var self = this;
 
-	var request = $.ajax({
-		url: wikitree.API_URL,
-		crossDomain: true,
-		xhrFields: { withCredentials: true },
-		type: 'POST',
-		dataType: 'json',
-		data: { 'action': 'login', 'user_id': self.user_id },
+    var email    = (opts && opts.email) ? opts.email : '';
+    var password = (opts && opts.password) ? opts.password : '';
+    var data = { 'action': 'login', 'email': email, 'password': password };
+    var request = wikitree._ajax(data);
 
-		// Local success handling to set our cookies.
-		success: function(data) { 
-			if (data.login.result == self.user_id) { 
-				$.cookie('wikitree_wtb_UserID', self.user_id);
-				$.cookie('wikitree_wtb_UserName', self.user_name);
-				self.loggedIn = true;
-			} else { 
-				$.cookie('wikitree_wtb_UserID', '');
-				$.cookie('wikitree_wtb_UserName', '');
-				self.loggedIn = false;
-			}
-		}, 
-		error: function(xhr, status) { 
-			$.cookie('wikitree_wtb_UserID', '');
-			$.cookie('wikitree_wtb_UserName', '');
-			self.loggedIn = false;
-		}
-	});
+    request
+      // On successful POST return, check our data. Note from that data whether the login itself was
+      // successful (setting session cookies if so). Call the user callback function when done.
+      .done(function(data) {
+        if (data.login.result == 'Success') { 
+          self.user_id   = data.login.userid;
+          self.user_name = data.login.username;
+          self.loggedIn = true;
+          $.cookie('wikitree_wtb_UserID', self.user_id);
+          $.cookie('wikitree_wtb_UserName', self.user_name);
+        } else { 
+          this.loggedIn = false;
+          $.cookie('wikitree_wtb_UserID', self.user_id);
+          $.cookie('wikitree_wtb_UserName', self.user_name);
+        }
+      })
+      // On failed POST/server error, act like a failed login.
+      .fail(function(xhr, status) {
+        this.user_id = 0;
+        this.user_name = '';
+        this.loggedin = false;
+        $.cookie('wikitree_wtb_UserID', self.user_id);
+        $.cookie('wikitree_wtb_UserName', self.user_name);
+      });
 
-	return request.promise();
+    return request;
+    
+  }
 
-}
-	
+  /**
+   * Logout user by deleting the cookies and resetting the sdk
+   */
+  wikitree.Session.prototype.logout = function(opts) {
+    this.loggedIn = false;
+    this.user_id = 0;
+    this.user_name = '';
+    $.removeCookie('wikitree_wtb_UserID');
+    $.removeCookie('wikitree_wtb_UserName');
+  }
 
-// Do an actual login through the server API with an Ajax call. 
-wikitree.Session.prototype.login = function(opts) {
-	var self = this;
+  /**
+   * Setup the sdk
+   */
+  wikitree.init = function(opts) { 
+    wikitree.session = new wikitree.Session();
+  }
 
-	var email    = (opts && opts.email) ? opts.email : '';
-	var password = (opts && opts.password) ? opts.password : '';
+  /*=======
+   * Person
+   *=======*/
 
-	var request = $.ajax({
-		url: wikitree.API_URL,
-		crossDomain: true,
-		xhrFields: { withCredentials: true },
-		type: 'POST',
-		dataType: 'json',
-		data: { 'action': 'login', 'email': email, 'password': password },
+  /**
+   * Create a person from the given `user_id`
+   */
+  var Person = wikitree.Person = function(data){
+    this._data = data;
+    if(data.Parents){
+      for(var p in data.Parents){
+        this._data.Parents[p] = new Person(data.Parents[p]);
+      }
+    }
+    if(data.Children){
+      for(var c in data.Children){
+        this._data.Children[c] = new Person(data.Children[c]);
+      }
+    }
+  };
+  
+  Person.prototype.getFirstName = function(){
+    return this._data.FirstName;
+  };
+  
+  Person.prototype.getLastNameCurrent = function(){
+    return this._data.LastNameCurrent;
+  };
+  
+  Person.prototype.getDisplayName = function(){
+    return this.getFirstName() + ' ' + this.getLastNameCurrent();
+  };
+  
+  Person.prototype.getGender = function(){
+    return this._data.Gender;
+  };
+  
+  Person.prototype.getBirthDate = function(){
+    return this._data.BirthDate;
+  };
+  
+  Person.prototype.getBirthLocation = function(){
+    return this._data.BirthLocation;
+  };
+  
+  Person.prototype.getDeathDate = function(){
+    return this._data.DeathDate;
+  };
+  
+  Person.prototype.getDeathLocation = function(){
+    return this._data.DeathLocation;
+  };
+  
+  Person.prototype.getFather = function(){
+    if(this._data.Father && this._data.Parents){
+      return this._data.Parents[this._data.Father];
+    }
+  };
+  
+  Person.prototype.getMother = function(){
+    if(this._data.Mother && this._data.Parents){
+      return this._data.Parents[this._data.Mother];
+    }
+  };
+  
+  Person.prototype.getChildren = function(){
+    return this._data.Children;
+  };
+  
+  Person.prototype.getId = function(){
+    return this._data.Id;
+  };
+  
+  Person.prototype.toJSON = function(){
+    return this._data;
+  };
+  
+  Person.prototype.isLiving = function(){
+    return this._data.IsLiving == 1;
+  };
+  
+  /**
+   * This is not the person's name but the identifier
+   * used in URLs; e.g. Smith-3624
+   */
+  Person.prototype.getName = function(){
+    return this._data.Name;
+  };
+  
+  /**
+   * Get a person from the specified id
+   */
+  wikitree.getPerson = function(personId, fields){
+    if(!fields){
+      fields = 'Id,Name,FirstName,MiddleName,LastNameAtBirth,LastNameCurrent,BirthDate,DeathDate,Father,Mother';
+    }
+    var data = { 
+      'action': 'getPerson', 
+      'key': personId, 
+      'fields': fields, 
+      'format': 'json'
+    };
+    var deferred = $.Deferred(),
+        promise = deferred.promise(),
+        request = wikitree._ajax(data);
+    
+    request
+      // On success, we note that we're done loading. 
+      // If we got data back, we store it in self and set loaded=true.
+      .done(function(data) {           
+        if(data[0].status) {
+          deferred.reject(data[0].status);
+        }
+        else { 
+          deferred.resolve(new Person(data[0].person));
+        }
+      })
+      // On error, report the "status" we got back.
+      .fail(function(xhr, status) {             
+        deferred.reject('Error in API query');
+      });
 
-		// On successful POST return, check our data. Note from that data whether the login itself was
-		// successful (setting session cookies if so). Call the user callback function when done.
-		success: function(data) { 
-			if (data.login.result == 'Success') { 
-				self.user_id   = data.login.userid;
-				self.user_name = data.login.username;
-				self.loggedIn = true;
-				$.cookie('wikitree_wtb_UserID', self.user_id);
-				$.cookie('wikitree_wtb_UserName', self.user_name);
-			} else { 
-				this.loggedIn = false;
-				$.cookie('wikitree_wtb_UserID', self.user_id);
-				$.cookie('wikitree_wtb_UserName', self.user_name);
-			}
-		}, 
-
-		// On failed POST/server error, act like a failed login.
-		error: function(xhr, status) { 
-			this.user_id = 0;
-			this.user_name = '';
-			this.loggedin = false;
-			$.cookie('wikitree_wtb_UserID', self.user_id);
-			$.cookie('wikitree_wtb_UserName', self.user_name);
-		}
-	});
-
-	return request.promise();
-	
-}
-
-wikitree.Session.prototype.logout = function(opts) {
-	this.loggedIn = false;
-	this.user_id = 0;
-	this.user_name = '';
-	$.removeCookie('wikitree_wtb_UserID');
-	$.removeCookie('wikitree_wtb_UserName');
-}
-
-
-wikitree.init = function(opts) { 
-	wikitree.session = new wikitree.Session();
-}
-
-
-
-/*
- * Person
- *
- *
- */
-
-
-// wikitree.Person( opts )
-wikitree.Person = function(opts){
-	this.user_id = (opts && opts.user_id) ? opts.user_id : 0;
-	this.loaded = false;
-	this.loading = false;
-};
-
-// wikitree.Person.load(callback, [fields])
-// 	The API on the server is called with $.ajax/$.post functions from jQuery. Those calls are *asynchronous*. 
-wikitree.Person.prototype.load = function(opts){
-	var self = this;
-
-	// If we have a fields passed in, use those. If not, use a default set.
-	var fields = 'Id,Name,FirstName,MiddleName,LastNameAtBirth,LastNameCurrent,BirthDate,DeathDate,Father,Mother'; 
-	if (opts && opts.fields) { fields = opts.fields; }
-
-
-	// If this Person is already loaded, we're all done. If not, we (may) have work to do.
-	if (!self.loaded) {
-		// Javascript will run right through the .ajax() call below and it's possible this Person.load() function will get called 
-		// again before loaded = true and before the first .ajax() call has returned. We don't want to post to the server more than once.
-		// If we're loading already, we don't have anything new to do.
-		if (!self.loading) { 
-			// Start loading our content from the server API.
-			self.loading = true;
-
-			// Post our content to the server API, passing along the requested fields.
-			// Use crossDomain=true in case we end up hosting this on something like apps.wikitree.com but configured
-			// to query the live database/API at www.wikitree.com. 
-			var request = $.ajax({
-				url: wikitree.API_URL,
-				crossDomain: true,
-				xhrFields: { withCredentials: true }, 
-				type: "POST",
-				dataType: 'json',
-				data: { 'action': 'getPerson', 'key': self.user_id, 'fields': fields, 'format': 'json' },
-	
-				// On success, we note that we're done loading. If we got data back, we store it in self and set loaded=true.
-				success: function(data) { 
-					self.loading = false;
-					self.status = data[0].status;
-					if (!self.status) { 
-						for (var x in data[0].person) { 
-							self[x] = data[0].person[x];
-						}
-					}
-					self.loaded = true;
-				},
-	
-				// On error, report the "status" we got back.
-				error: function(xhr, status) { 
-					self.loading = false;
-					self.loaded  = false;
-					self.status = 'Error in API query';
-				}
-			});
-
-			return request.promise();
-		}
-	} 
-
-};
+    return promise;
+  };
+  
+  /**
+   * Get a user's watchlist
+   */
+  wikitree.getWatchlist = function(){
+    var deferred = $.Deferred(),
+        request = wikitree._ajax({action:'getWatchlist'});
+    request.done(function(response){
+      if(response[0].status) {
+        deferred.reject(response[0].status);
+      }
+      else { 
+        var persons = [];
+        $.each(response[0].watchlist, function(i, person){
+          persons.push(new Person(person));
+        });
+        deferred.resolve(persons);
+      }
+    }).fail(function(){
+      deferred.reject('Error in API query');
+    });
+    return deferred.promise();
+  };
+  
+  /**
+   * Perform an ajax request to the API.
+   * Return a promise
+   */
+  wikitree._ajax = function(opts){
+    opts.format = 'json';
+    return $.ajax({
+      url: wikitree.API_URL,
+      crossDomain: true,
+      xhrFields: { withCredentials: true }, 
+      type: 'POST',
+      dataType: 'json',
+      data: opts
+    }).promise();
+  };
+  
+}();

@@ -1,0 +1,19 @@
+{
+  "name": "wikitree-javascript-sdk",
+  "version": "0.1.0",
+  "description": "JavaScript SDK for the WikiTree API",
+  "main": "wikitree.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/justincy/wikitree-javascript-sdk.git"
+  },
+  "author": "Brian Casey",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/justincy/wikitree-javascript-sdk/issues"
+  },
+  "homepage": "https://github.com/justincy/wikitree-javascript-sdk"
+}
