@@ -1,3 +1,5 @@
+require('./setup');
+
 var wikitree = require('./../lib/wikitree'),
     expect = require('chai').expect;
     

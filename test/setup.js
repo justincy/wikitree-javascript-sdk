@@ -1,8 +1,13 @@
+/**
+ * Test tooling
+ */
+
 var Q = require('q'),
     utils = require('../lib/utils.js');
   
 // Mock jQuery $ object for testing
 var $ = GLOBAL.$ = {
+  
   Deferred: function(){
     var defer = Q.defer(),
         origPromise = defer.promise,
@@ -35,23 +40,39 @@ var $ = GLOBAL.$ = {
     
     return defer;
   },
+  
   ajax: function(opts){
     var defer = $.Deferred();
     
     try {
       var action = opts.data.action,
-          json = require('./responses/' + action + '.json');
+          json = require('./responses/' + action)(opts.data);
       setTimeout(function(){
         defer.resolve(json);
       });
     } catch(e) {
       console.log(e);
       setTimeout(function(){
-        defer.reject(new Error('Unable to load repsonse file for ' + action));
+        defer.reject(new Error('Unable to load response file for ' + action));
       });
     }
     
     return defer;
+  },
+  
+  _cookies: {},
+  
+  cookie: function(key, val){
+    if(typeof val === 'undefined'){
+      return this._cookies[key];
+    } else {
+      // Force everything to a string because that's how cookies are stored
+      this._cookies[key] = '' + val;
+    }
+  },
+  
+  removeCookie: function(key){
+    delete this._cookies[key];
   }
 };
 
