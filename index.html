@@ -97,8 +97,7 @@ logged_in {
 // In the ready() function we run some code when the DOM is ready to go.
 $(document).ready(function(){ 
 
-	wikitree.init({});
-	wikitree.session.checkLogin({})
+	wikitree.checkLogin({})
 		.then(function(data) { 
 			if (wikitree.session.loggedIn) { 
 				$('#need_login').hide();
@@ -113,7 +112,7 @@ $(document).ready(function(){
 });
 
 function tryLogin() { 
-	wikitree.session.login( {email: $('#wpEmail').val(), password: $('#wpPassword2').val() })
+	wikitree.login( {email: $('#wpEmail').val(), password: $('#wpPassword2').val() })
 		.then(function(data) {
 			if (wikitree.session.loggedIn) { 
 				$('#need_login').hide();
@@ -172,7 +171,7 @@ function walk(user_id) {
 
 // Log the user out of apps.wikitree.com by deleting all the cookies
 function appsLogout() { 
-	wikitree.session.logout();
+	wikitree.logout();
 	document.location.reload(true);
 }
 </script>
