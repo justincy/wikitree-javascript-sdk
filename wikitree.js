@@ -1,8 +1,10 @@
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.wikitree = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+var wikitree = require('./wikitree');
+
 /**
  * Create a person from the given `user_id`
  */
-var Person = module.exports = function(data){
+var Person = wikitree.Person = function(data){
   this._data = data;
   if(data.Parents){
     for(var p in data.Parents){
@@ -83,12 +85,12 @@ Person.prototype.isLiving = function(){
 Person.prototype.getName = function(){
   return this._data.Name;
 };
-},{}],2:[function(require,module,exports){
+},{"./wikitree":4}],2:[function(require,module,exports){
 var wikitree = require('./wikitree');
 
-var Session = module.exports = function(opts) {
-  this.user_id    = (opts && opts.user_id) ? opts.user_id : $.cookie('wikitree_wtb_UserID');
-  this.user_name  = (opts && opts.user_name) ? opts.user_name : $.cookie('wikitree_wtb_UserName');
+wikitree.Session = function(opts) {
+  this.user_id    = (opts && opts.user_id) ? opts.user_id : $.cookie('wikitree_wtb_UserID') || '';
+  this.user_name  = (opts && opts.user_name) ? opts.user_name : $.cookie('wikitree_wtb_UserName') || '';
   this.loggedIn  = false;
 };
   
@@ -96,44 +98,45 @@ var Session = module.exports = function(opts) {
  * Define new method for Session objects to check the current login.
  * Return a promise object (from our .ajax() call) so we can do things when this resolves.
  */
-Session.prototype.checkLogin = function (opts){
+wikitree.checkLogin = function (opts){
 
-  var self = this;
+  var session = this.session;
 
-  if (opts && opts.user_id) { self.user_id = opts.user_id; }
-  if (opts && opts.user_name) { self.user_name = opts.user_name; }
+  if (opts && opts.user_id) { session.user_id = opts.user_id; }
+  if (opts && opts.user_name) { session.user_name = opts.user_name; }
   
-  var data = { 'action': 'login', 'user_id': self.user_id };
+  var data = { 'action': 'login', 'user_id': session.user_id };
   var request = wikitree._ajax(data);
 
   request
     // Local success handling to set our cookies.
     .done(function(data) {        
-      if (data.login.result == self.user_id) { 
-        $.cookie('wikitree_wtb_UserID', self.user_id);
-        $.cookie('wikitree_wtb_UserName', self.user_name);
-        self.loggedIn = true;
+      if (data.login.result == session.user_id) { 
+        $.cookie('wikitree_wtb_UserID', session.user_id);
+        $.cookie('wikitree_wtb_UserName', session.user_name);
+        session.loggedIn = true;
       } else { 
-        $.cookie('wikitree_wtb_UserID', '');
-        $.cookie('wikitree_wtb_UserName', '');
-        self.loggedIn = false;
+        $.removeCookie('wikitree_wtb_UserID');
+        $.removeCookie('wikitree_wtb_UserName');
+        session.loggedIn = false;
       }
     })
     .fail(function(xhr, status) { 
-      $.cookie('wikitree_wtb_UserID', '');
-      $.cookie('wikitree_wtb_UserName', '');
-      self.loggedIn = false;
+      $.removeCookie('wikitree_wtb_UserID');
+      $.removeCookie('wikitree_wtb_UserName');
+      session.loggedIn = false;
     });
 
   return request;
 
-}
+};
   
 /**
  * Do an actual login through the server API with an Ajax call. 
  */
-Session.prototype.login = function(opts) {
-  var self = this;
+wikitree.login = function(opts) {
+  var session = this.session;
+  wikitree.logout();
 
   var email    = (opts && opts.email) ? opts.email : '';
   var password = (opts && opts.password) ? opts.password : '';
@@ -145,55 +148,63 @@ Session.prototype.login = function(opts) {
     // successful (setting session cookies if so). Call the user callback function when done.
     .done(function(data) {
       if (data.login.result == 'Success') { 
-        self.user_id   = data.login.userid;
-        self.user_name = data.login.username;
-        self.loggedIn = true;
-        $.cookie('wikitree_wtb_UserID', self.user_id);
-        $.cookie('wikitree_wtb_UserName', self.user_name);
-      } else { 
-        this.loggedIn = false;
-        $.cookie('wikitree_wtb_UserID', self.user_id);
-        $.cookie('wikitree_wtb_UserName', self.user_name);
+        session.user_id   = data.login.userid;
+        session.user_name = data.login.username;
+        session.loggedIn = true;
+        $.cookie('wikitree_wtb_UserID', session.user_id);
+        $.cookie('wikitree_wtb_UserName', session.user_name);
       }
-    })
-    // On failed POST/server error, act like a failed login.
-    .fail(function(xhr, status) {
-      this.user_id = 0;
-      this.user_name = '';
-      this.loggedin = false;
-      $.cookie('wikitree_wtb_UserID', self.user_id);
-      $.cookie('wikitree_wtb_UserName', self.user_name);
     });
 
   return request;
   
-}
+};
 
 /**
  * Logout user by deleting the cookies and resetting the sdk
  */
-Session.prototype.logout = function(opts) {
-  this.loggedIn = false;
-  this.user_id = 0;
-  this.user_name = '';
+wikitree.logout = function() {
+  this.session.loggedIn = false;
+  this.session.user_id = '';
+  this.session.user_name = '';
   $.removeCookie('wikitree_wtb_UserID');
   $.removeCookie('wikitree_wtb_UserName');
-}
-},{"./wikitree":3}],3:[function(require,module,exports){
+};
+},{"./wikitree":4}],3:[function(require,module,exports){
+var utils = module.exports = {};
+
+/**
+ * Lifted from underscore.js
+ * http://underscorejs.org/docs/underscore.html#section-15
+ */
+utils.each = function(obj, iterator, context) {
+  if (obj == null) return obj;
+  if (Array.prototype.forEach && obj.forEach === Array.prototype.forEach) {
+    obj.forEach(iterator, context);
+  } else if (obj.length === +obj.length) {
+    for (var i = 0, length = obj.length; i < length; i++) {
+      iterator.call(context, obj[i], i, obj);
+    }
+  } else {
+    var keys = utils.keys(obj);
+    for (var i = 0, length = keys.length; i < length; i++) {
+      iterator.call(context, obj[keys[i]], keys[i], obj);
+    }
+  }
+  return obj;
+};
+},{}],4:[function(require,module,exports){
+var utils = require('./utils');
+
 var wikitree = module.exports = {
   API_URL: '/api.php',
   API_DOMAIN: 'https://apps.wikitree.com'
 };
 
-var Session = require('./Session'),
-    Person = require('./Person');
-    
-/**
- * Setup the sdk
- */
-wikitree.init = function(opts) { 
-  wikitree.session = new Session();
-};
+require('./Session');
+require('./Person');
+
+wikitree.session = new wikitree.Session();
 
 /**
  * Get a person from the specified id
@@ -220,7 +231,7 @@ wikitree.getPerson = function(personId, fields){
         deferred.reject(data[0].status);
       }
       else { 
-        deferred.resolve(new Person(data[0].person));
+        deferred.resolve(new wikitree.Person(data[0].person));
       }
     })
     // On error, report the "status" we got back.
@@ -243,8 +254,8 @@ wikitree.getWatchlist = function(){
     }
     else { 
       var persons = [];
-      $.each(response[0].watchlist, function(i, person){
-        persons.push(new Person(person));
+      utils.each(response[0].watchlist, function(person, i){
+        persons.push(new wikitree.Person(person));
       });
       deferred.resolve(persons);
     }
@@ -269,5 +280,5 @@ wikitree._ajax = function(opts){
     data: opts
   }).promise();
 };
-},{"./Person":1,"./Session":2}]},{},[3])(3)
+},{"./Person":1,"./Session":2,"./utils":3}]},{},[4])(4)
 });
