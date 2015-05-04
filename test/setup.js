@@ -57,7 +57,7 @@ var $ = GLOBAL.$ = {
       });
     }
     
-    return defer;
+    return defer.promise();
   },
   
   _cookies: {},

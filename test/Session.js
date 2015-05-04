@@ -24,7 +24,7 @@ describe('Session', function(){
     wikitree.checkLogin({
       user_id: 25487512,
       user_name: 'Test-789'
-    }).done(function(){
+    }).fail(function(){
       check(done, function(){
         expect(wikitree.session.loggedIn).to.be.false;
         expect(wikitree.session.user_id).to.equal(25487512);
@@ -60,7 +60,7 @@ describe('Session', function(){
     wikitree.login({
       email: 'test@testing.com',
       password: 'wrong'
-    }).done(function(){
+    }).fail(function(){
       check(done, function(){
         expect(wikitree.session.loggedIn).to.be.false;
         expect(wikitree.session.user_id).to.equal('');
