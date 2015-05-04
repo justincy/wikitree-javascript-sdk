@@ -8,7 +8,7 @@ describe('getProfile', function(){
   it('no id', function(){
     expect(function(){
       wikitree.getProfile();
-    }).to.throw(Error, 'Profile id is required.');
+    }).to.throw(Error, 'Profile ID is required.');
   });
   
   it('with id', function(done){
