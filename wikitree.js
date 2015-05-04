@@ -2,6 +2,81 @@
 var wikitree = require('./wikitree');
 
 /**
+ * Get a list of FS connections for a person.
+ */
+wikitree.getPersonFSConnections = function(id){
+  if(!id){
+    throw new Error('Profile ID is required.');
+  }
+  
+  var deferred = $.Deferred(),
+      request = wikitree._ajax({
+        action: 'getPersonFSConnections',
+        key: id
+      });
+  
+  request
+    .done(function(data) {           
+      if(data[0].status) {
+        deferred.reject(data[0].status);
+      }
+      else { 
+        deferred.resolve(data[0].connections);
+      }
+    })
+    .fail(function(xhr, status) {             
+      deferred.reject('Error in API query');
+    });
+
+  return deferred.promise();
+};
+
+/**
+ * Create an FS connection for a person.
+ */
+wikitree.addPersonFSConnection = function(wikiId, fsId, lastModified, certainty){
+  if(!wikiId){
+    throw new Error('WikiTree ID is required.');
+  }
+  if(!fsId){
+    throw new Error('FamilySearch ID is required.');
+  }
+  if(!lastModified){
+    throw new Error('Last-modified timestamp is required.');
+  }
+  if(!certainty){
+    throw new Error('Certainty is required.');
+  }
+
+  var deferred = $.Deferred(),
+      request = wikitree._ajax({
+        action: 'addPersonFSConnection',
+        key: wikiId,
+        fs_id: fsId,
+        fs_modified: lastModified,
+        certainty: certainty
+      });
+    
+  request
+    .done(function(data) {           
+      if(data[0].status) {
+        deferred.reject(data[0].status);
+      }
+      else { 
+        console.log('resolving');
+        deferred.resolve(data[0].connection);
+      }
+    })
+    .fail(function(xhr, status) {             
+      deferred.reject('Error in API query');
+    });
+
+  return deferred.promise();
+};
+},{"./wikitree":5}],2:[function(require,module,exports){
+var wikitree = require('./wikitree');
+
+/**
  * Create a person from the given `user_id`
  */
 var Person = wikitree.Person = function(data){
@@ -85,7 +160,7 @@ Person.prototype.isLiving = function(){
 Person.prototype.getName = function(){
   return this._data.Name;
 };
-},{"./wikitree":4}],2:[function(require,module,exports){
+},{"./wikitree":5}],3:[function(require,module,exports){
 var wikitree = require('./wikitree');
 
 wikitree.Session = function(opts) {
@@ -170,7 +245,7 @@ wikitree.logout = function() {
   $.removeCookie('wikitree_wtb_UserID');
   $.removeCookie('wikitree_wtb_UserName');
 };
-},{"./wikitree":4}],3:[function(require,module,exports){
+},{"./wikitree":5}],4:[function(require,module,exports){
 var utils = module.exports = {};
 
 /**
@@ -193,7 +268,7 @@ utils.each = function(obj, iterator, context) {
   }
   return obj;
 };
-},{}],4:[function(require,module,exports){
+},{}],5:[function(require,module,exports){
 var utils = require('./utils');
 
 var wikitree = module.exports = {
@@ -205,6 +280,7 @@ var wikitree = module.exports = {
 
 require('./Session');
 require('./Person');
+require('./FS');
 
 wikitree.session = new wikitree.Session();
 
@@ -226,8 +302,6 @@ wikitree.getPerson = function(personId, fields){
       request = wikitree._ajax(data);
   
   request
-    // On success, we note that we're done loading. 
-    // If we got data back, we store it in self and set loaded=true.
     .done(function(data) {           
       if(data[0].status) {
         deferred.reject(data[0].status);
@@ -236,7 +310,6 @@ wikitree.getPerson = function(personId, fields){
         deferred.resolve(new wikitree.Person(data[0].person));
       }
     })
-    // On error, report the "status" we got back.
     .fail(function(xhr, status) {             
       deferred.reject('Error in API query');
     });
@@ -268,6 +341,91 @@ wikitree.getWatchlist = function(){
 };
 
 /**
+ * Get privacy levels. Returns a map keyed by privacy level.
+ */
+wikitree.getPrivacyLevels = function(){
+  var deferred = $.Deferred(),
+      request = wikitree._ajax({action:'getPrivacyLevels'});
+  request.done(function(levels){
+    deferred.resolve(levels[0]);
+  }).done(function(){
+    deferred.reject('Error in API query');
+  })
+  return deferred.promise();
+};
+
+/**
+ * Get profile. Requires a profile ID. Returns a person object.
+ * Returns same info as getPerson with no fields specified,
+ * except that it has a few additional items such as privacy info.
+ */
+wikitree.getProfile = function(id){
+  if(!id){
+    throw new Error('Profile ID is required.');
+  }
+  
+  var deferred = $.Deferred(),
+      request = wikitree._ajax({
+        action: 'getProfile',
+        key: id
+      });
+  
+  request
+    .done(function(data) {           
+      if(data[0].status) {
+        deferred.reject(data[0].status);
+      }
+      else { 
+        deferred.resolve(new wikitree.Person(data[0].profile));
+      }
+    })
+    .fail(function(xhr, status) {             
+      deferred.reject('Error in API query');
+    });
+
+  return deferred.promise();
+};
+
+/**
+ * Retrieve the list of ancestors of a person.
+ * Depth is optional; ranges 1-10.
+ */
+wikitree.getAncestors = function(id, depth){
+  if(!id){
+    throw new Error('Profile ID is required.');
+  }
+  var data = {
+    action: 'getAncestors',
+    key: id
+  };
+  if(depth && depth >=1 && depth <= 10){
+    data.depth = depth;
+  }
+  
+  var deferred = $.Deferred(),
+      request = wikitree._ajax(data);
+  
+  request
+    .done(function(data) {           
+      if(data[0].status) {
+        deferred.reject(data[0].status);
+      }
+      else { 
+        var persons = [];
+        utils.each(data[0].ancestors, function(ancestor){
+          persons.push(new wikitree.Person(ancestor));
+        });
+        deferred.resolve(persons);
+      }
+    })
+    .fail(function(xhr, status) {             
+      deferred.reject('Error in API query');
+    });
+
+  return deferred.promise();
+};
+
+/**
  * Perform an ajax request to the API.
  * Return a promise
  */
@@ -289,5 +447,5 @@ wikitree._ajax = function(opts){
     data: opts
   }).promise();
 };
-},{"./Person":1,"./Session":2,"./utils":3}]},{},[4])(4)
+},{"./FS":1,"./Person":2,"./Session":3,"./utils":4}]},{},[5])(5)
 });
