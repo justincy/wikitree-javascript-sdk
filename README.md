@@ -59,6 +59,9 @@ Javascript library to work with the WikiTree API functions.
 </script>
 ```
 
+See the [API docs](http://apps.wikitree.com/api.php) for a complete listing of
+available API functions and parameters.
+
 ### Person
 
 __getFirstName()__
