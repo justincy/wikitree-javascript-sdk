@@ -12,7 +12,7 @@ Javascript library to work with the WikiTree API functions.
 
 ## Usage
 
-```js
+```html
 
 // Load scripts
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
@@ -31,21 +31,48 @@ Javascript library to work with the WikiTree API functions.
 	
 	});
 
-	// Get a person
-	wikitree.getPerson('123456789').then(function(person){
-	
+	// Get a person. Returns a Person object.
+	wikitree.getPerson(id).then(function(person){
+		
 	});
 	
 	// Get a user's watchlist
 	wikitree.getWatchlist().then(function(watchlist){
 	
 	});
+	
+	// Get a person's ancestors.
+	wikitree.getAncestors(id).then(function(ancestors){
+	
+	});
+	
+	// Get a profile.
+	wikitree.getProfile(id).then(function(profile){
+	
+	});
+	
+	// Get privacy levels.
+	wikitree.getPrivacyLevels().then(function(privacyLevels){
+	
+	});
 
 </script>
-
 ```
 
 ## Example
 
 The documentation here is incomplete as the SDK (and the API itself) are all in early development.
 The index.html file has a decent example of usage. 
+
+## Contributing
+
+```
+# run tests
+npm test
+
+# run coverage; output will be on the coverage directory
+npm run coverage
+
+# build with browserify
+npm run build
+```
