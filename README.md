@@ -59,6 +59,40 @@ Javascript library to work with the WikiTree API functions.
 </script>
 ```
 
+### Person
+
+__getFirstName()__
+
+__getLastNameCurrent()__
+
+__getDisplayName()__ - First name and last name.
+
+__getGender()__
+
+__getBirthDate()__
+
+__getBirthLocation()__
+
+__getDeathDate()__
+
+__getDeathLocation()__
+
+__getFather()__ - Returns a Person object for the father, if available.
+
+__getMother()__ - Returns a Person object for the mother, if available.
+
+__getChildren()__ - Returns an array of Person objects for the children.
+
+__isLiving()__ - Returns `true` or `false`.
+
+__getId()__
+
+__getName()__ - This is not the person's name but the identifier which is used in URLs; eg `"Smith-1234"`.
+
+__toJSON()__ - Returns the raw JSON data. Tell us if you use this for anything
+other than serialization because it likely means that something is missing from
+the SDK.
+
 ## Example
 
 The documentation here is incomplete as the SDK (and the API itself) are all in early development.
