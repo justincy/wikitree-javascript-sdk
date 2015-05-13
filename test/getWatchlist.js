@@ -10,8 +10,16 @@ describe('getWatchlist', function(){
       check(done, function(){
         expect(watchlist).to.have.length(3);
         expect(watchlist[0]).to.be.instanceof(wikitree.Person);
-      })
-    })
-  })
+      });
+    });
+  });
   
-})
+  it('with params', function(done){
+    wikitree.getWatchlist({limit:1}).done(function(watchlist){
+      check(done, function(){
+        expect(watchlist).to.have.length(1);
+      });
+    });
+  });
+  
+});

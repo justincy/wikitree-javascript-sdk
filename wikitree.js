@@ -306,8 +306,12 @@ wikitree.getPerson = function(personId, fields){
 /**
  * Get a user's watchlist
  */
-wikitree.getWatchlist = function(){
-  return wikitree._ajax({action:'getWatchlist'}, function(response){
+wikitree.getWatchlist = function(params){
+  if(typeof params === 'undefined'){
+    params = {};
+  }
+  params.action = 'getWatchlist';
+  return wikitree._ajax(params, function(response){
     var persons = [];
     utils.each(response[0].watchlist, function(person, i){
       persons.push(new wikitree.Person(person));
