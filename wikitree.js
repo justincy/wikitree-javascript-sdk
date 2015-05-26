@@ -122,11 +122,19 @@ Person.prototype.getFather = function(){
   }
 };
 
+Person.prototype.getFatherId = function(){
+  return this._data.Father;
+}
+
 Person.prototype.getMother = function(){
   if(this._data.Mother && this._data.Parents){
     return this._data.Parents[this._data.Mother];
   }
 };
+
+Person.prototype.getMotherId = function(){
+  return this._data.Mother;
+}
 
 Person.prototype.getChildren = function(){
   return this._data.Children;
@@ -150,6 +158,28 @@ Person.prototype.isLiving = function(){
  */
 Person.prototype.getName = function(){
   return this._data.Name;
+};
+
+Person.prototype.setMother = function(person){
+  var id = person.getId();
+  if(!this._data.Mother){
+    this._data.Mother = id;
+  }
+  if(!this._data.Parents){
+    this._data.Parents = {};
+  }
+  this._data.Parents[id] = person;
+};
+
+Person.prototype.setFather = function(person){
+  var id = person.getId();
+  if(!this._data.Father){
+    this._data.Father = id;
+  }
+  if(!this._data.Parents){
+    this._data.Parents = {};
+  }
+  this._data.Parents[id] = person;
 };
 },{"./wikitree":5}],3:[function(require,module,exports){
 var wikitree = require('./wikitree'),
@@ -365,11 +395,27 @@ wikitree.getAncestors = function(id, depth){
   }
   
   return wikitree._ajax(data, function(data){
-    var persons = [];
+    var list = [],
+        map = {};
+        
     utils.each(data[0].ancestors, function(ancestor){
-      persons.push(new wikitree.Person(ancestor));
+      var person = new wikitree.Person(ancestor);
+      list.push(person);
+      map[person.getId()] = person;
     });
-    return persons;
+    
+    utils.each(list, function(person){
+      var father = map[person.getFatherId()],
+          mother = map[person.getMotherId()];
+      if(father){
+        person.setFather(father);
+      }
+      if(mother){
+        person.setMother(mother);
+      }
+    });
+    
+    return list;
   });
 };
 

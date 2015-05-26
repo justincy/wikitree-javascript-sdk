@@ -18,6 +18,8 @@ describe('getAncestors', function(){
         for(var i = 0; i < ancestors.length; i++){
           expect(ancestors[i]).to.be.instanceof(wikitree.Person);
         }
+        expect(ancestors[0].getFather()).to.be.instanceof(wikitree.Person);
+        expect(ancestors[0].getMother()).to.be.instanceof(wikitree.Person);
       });
     });
   });

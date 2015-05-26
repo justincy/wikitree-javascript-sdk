@@ -6,7 +6,7 @@ var wikitree = require('./../lib/wikitree'),
     
 describe('Session', function(){
   
-  it.only('checkLogin success', function(done){
+  it('checkLogin success', function(done){
     wikitree.checkLogin({
       user_id: 57489123,
       user_name: 'Test-123'
