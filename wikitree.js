@@ -152,11 +152,12 @@ Person.prototype.getName = function(){
   return this._data.Name;
 };
 },{"./wikitree":5}],3:[function(require,module,exports){
-var wikitree = require('./wikitree');
+var wikitree = require('./wikitree'),
+    cookies = require('mozilla-doc-cookies');
 
 wikitree.Session = function(opts) {
-  this.user_id    = (opts && opts.user_id) ? opts.user_id : $.cookie('wikitree_wtb_UserID') || '';
-  this.user_name  = (opts && opts.user_name) ? opts.user_name : $.cookie('wikitree_wtb_UserName') || '';
+  this.user_id    = (opts && opts.user_id) ? opts.user_id : cookies.getItem('wikitree_wtb_UserID') || '';
+  this.user_name  = (opts && opts.user_name) ? opts.user_name : cookies.getItem('wikitree_wtb_UserName') || '';
   this.loggedIn  = false;
 };
   
@@ -179,20 +180,20 @@ wikitree.checkLogin = function (opts){
     // Local success handling to set our cookies.
     .done(function(data) {
       if (data.login.result == session.user_id) { 
-        $.cookie('wikitree_wtb_UserID', session.user_id);
-        $.cookie('wikitree_wtb_UserName', session.user_name);
+        cookies.setItem('wikitree_wtb_UserID', session.user_id);
+        cookies.setItem('wikitree_wtb_UserName', session.user_name);
         session.loggedIn = true;
         deferred.resolve();
       } else { 
-        $.removeCookie('wikitree_wtb_UserID');
-        $.removeCookie('wikitree_wtb_UserName');
+        cookies.removeItem('wikitree_wtb_UserID');
+        cookies.removeItem('wikitree_wtb_UserName');
         session.loggedIn = false;
         deferred.reject();
       }
     })
     .fail(function(xhr, status) { 
-      $.removeCookie('wikitree_wtb_UserID');
-      $.removeCookie('wikitree_wtb_UserName');
+      cookies.removeItem('wikitree_wtb_UserID');
+      cookies.removeItem('wikitree_wtb_UserName');
       session.loggedIn = false;
       deferred.reject();
     });
@@ -221,8 +222,8 @@ wikitree.login = function(opts) {
         session.user_id   = data.login.userid;
         session.user_name = data.login.username;
         session.loggedIn = true;
-        $.cookie('wikitree_wtb_UserID', session.user_id);
-        $.cookie('wikitree_wtb_UserName', session.user_name);
+        cookies.setItem('wikitree_wtb_UserID', session.user_id);
+        cookies.setItem('wikitree_wtb_UserName', session.user_name);
         deferred.resolve();
       } else {
         deferred.reject();
@@ -243,10 +244,10 @@ wikitree.logout = function() {
   this.session.loggedIn = false;
   this.session.user_id = '';
   this.session.user_name = '';
-  $.removeCookie('wikitree_wtb_UserID');
-  $.removeCookie('wikitree_wtb_UserName');
+  cookies.removeItem('wikitree_wtb_UserID');
+  cookies.removeItem('wikitree_wtb_UserName');
 };
-},{"./wikitree":5}],4:[function(require,module,exports){
+},{"./wikitree":5,"mozilla-doc-cookies":6}],4:[function(require,module,exports){
 var utils = module.exports = {};
 
 /**
@@ -416,5 +417,70 @@ wikitree._ajax = function(opts, success){
   
   return deferred.promise();
 };
-},{"./FS":1,"./Person":2,"./Session":3,"./utils":4}]},{},[5])(5)
+},{"./FS":1,"./Person":2,"./Session":3,"./utils":4}],6:[function(require,module,exports){
+/*\
+|*|
+|*|  :: cookies.js ::
+|*|
+|*|  A complete cookies reader/writer framework with full unicode support.
+|*|
+|*|  Revision #1 - September 4, 2014
+|*|
+|*|  https://developer.mozilla.org/en-US/docs/Web/API/document.cookie
+|*|  https://developer.mozilla.org/User:fusionchess
+|*|
+|*|  This framework is released under the GNU Public License, version 3 or later.
+|*|  http://www.gnu.org/licenses/gpl-3.0-standalone.html
+|*|
+|*|  Syntaxes:
+|*|
+|*|  * docCookies.setItem(name, value[, end[, path[, domain[, secure]]]])
+|*|  * docCookies.getItem(name)
+|*|  * docCookies.removeItem(name[, path[, domain]])
+|*|  * docCookies.hasItem(name)
+|*|  * docCookies.keys()
+|*|
+\*/
+
+module.exports = {
+  getItem: function (sKey) {
+    if (!sKey) { return null; }
+    return decodeURIComponent(document.cookie.replace(new RegExp("(?:(?:^|.*;)\\s*" + encodeURIComponent(sKey).replace(/[\-\.\+\*]/g, "\\$&") + "\\s*\\=\\s*([^;]*).*$)|^.*$"), "$1")) || null;
+  },
+  setItem: function (sKey, sValue, vEnd, sPath, sDomain, bSecure) {
+    if (!sKey || /^(?:expires|max\-age|path|domain|secure)$/i.test(sKey)) { return false; }
+    var sExpires = "";
+    if (vEnd) {
+      switch (vEnd.constructor) {
+        case Number:
+          sExpires = vEnd === Infinity ? "; expires=Fri, 31 Dec 9999 23:59:59 GMT" : "; max-age=" + vEnd;
+          break;
+        case String:
+          sExpires = "; expires=" + vEnd;
+          break;
+        case Date:
+          sExpires = "; expires=" + vEnd.toUTCString();
+          break;
+      }
+    }
+    document.cookie = encodeURIComponent(sKey) + "=" + encodeURIComponent(sValue) + sExpires + (sDomain ? "; domain=" + sDomain : "") + (sPath ? "; path=" + sPath : "") + (bSecure ? "; secure" : "");
+    return true;
+  },
+  removeItem: function (sKey, sPath, sDomain) {
+    if (!this.hasItem(sKey)) { return false; }
+    document.cookie = encodeURIComponent(sKey) + "=; expires=Thu, 01 Jan 1970 00:00:00 GMT" + (sDomain ? "; domain=" + sDomain : "") + (sPath ? "; path=" + sPath : "");
+    return true;
+  },
+  hasItem: function (sKey) {
+    if (!sKey) { return false; }
+    return (new RegExp("(?:^|;\\s*)" + encodeURIComponent(sKey).replace(/[\-\.\+\*]/g, "\\$&") + "\\s*\\=")).test(document.cookie);
+  },
+  keys: function () {
+    var aKeys = document.cookie.replace(/((?:^|\s*;)[^\=]+)(?=;|$)|^\s*|\s*(?:\=[^;]*)?(?:\1|$)/g, "").split(/\s*(?:\=[^;]*)?;\s*/);
+    for (var nLen = aKeys.length, nIdx = 0; nIdx < nLen; nIdx++) { aKeys[nIdx] = decodeURIComponent(aKeys[nIdx]); }
+    return aKeys;
+  }
+};
+
+},{}]},{},[5])(5)
 });
