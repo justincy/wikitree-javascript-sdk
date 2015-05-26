@@ -58,21 +58,6 @@ var $ = GLOBAL.$ = {
     }
     
     return defer.promise();
-  },
-  
-  _cookies: {},
-  
-  cookie: function(key, val){
-    if(typeof val === 'undefined'){
-      return this._cookies[key];
-    } else {
-      // Force everything to a string because that's how cookies are stored
-      this._cookies[key] = '' + val;
-    }
-  },
-  
-  removeCookie: function(key){
-    delete this._cookies[key];
   }
 };
 
@@ -85,4 +70,8 @@ GLOBAL.check = function(done, f){
   } catch(e) {
     done(e);
   }
+};
+
+GLOBAL.document = {
+  cookie: ''
 };
