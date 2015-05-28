@@ -8,7 +8,6 @@ Javascript library to work with the WikiTree API functions.
 
 ## Prerequisites
 * jQuery 1.10 or higher (may work with lower versions but it hasn't been tested)
-* jQuery Cookie Plugin 1.3.1 or later (https://github.com/carhartl/jquery-cookie)
 
 ## Usage
 
@@ -16,7 +15,6 @@ Javascript library to work with the WikiTree API functions.
 
 // Load scripts
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
-<script src="//cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
 <script src="wikitree.js"></script>
 
 <script type="text/javascript">
