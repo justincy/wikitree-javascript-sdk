@@ -161,6 +161,26 @@ Person.prototype.getName = function(){
 };
 
 /**
+ * Get the URL to the person's profile page on wikitree.com
+ */
+Person.prototype.getProfileUrl = function(){
+  return 'http://www.wikitree.com/wiki/' + this.getName();
+};
+
+/**
+ * Retrieve the a URL for the person's photo. Size
+ * may be 75, 300, or 500. Defaults to 300.
+ */
+Person.prototype.getPhotoUrl = function(size){
+  if(this._data.Photo){
+    if([75,300,500].indexOf(size) === -1){
+      size = 300;
+    }
+    return 'http://www.wikitree.com/photo.php/thumb/a/ad/' + this._data.Photo + '/' + size + 'px-' + this._data.Photo;
+  }
+};
+
+/**
  * Sets this person's mother to be the specified person.
  */
 Person.prototype.setMother = function(person){

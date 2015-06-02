@@ -90,6 +90,10 @@ __getId()__
 
 __getName()__ - This is not the person's name but the identifier which is used in URLs; eg `"Smith-1234"`.
 
+__getProfileUrl()__ - Return a URL to the person's profile on WikiTree.
+
+__getPhotoUrl()__ - Return a URL to the person's profile photo.
+
 __toJSON()__ - Returns the raw JSON data. Tell us if you use this for anything
 other than serialization because it likely means that something is missing from
 the SDK.
