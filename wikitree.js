@@ -320,15 +320,14 @@ wikitree.session = new wikitree.Session();
  * Get a person from the specified id
  */
 wikitree.getPerson = function(personId, fields){
-  if(!fields){
-    fields = 'Id,Name,FirstName,MiddleName,LastNameAtBirth,LastNameCurrent,BirthDate,DeathDate,Father,Mother';
-  }
   var data = { 
     'action': 'getPerson', 
-    'key': personId, 
-    'fields': fields, 
+    'key': personId,
     'format': 'json'
   };
+  if(fields){
+    data.fields = fields;
+  }
   return wikitree._ajax(data, function(data) {           
     return new wikitree.Person(data[0].person);
   });
@@ -432,6 +431,10 @@ wikitree._ajax = function(opts, success){
   if(this.API_KEY && this.API_CODE){
     opts.api_key = this.API_KEY;
     opts.api_code = this.API_CODE;
+  }
+  
+  if(opts.fields){
+    opts.fields = opts.fields.join(',');
   }
   
   var deferred = $.Deferred();
