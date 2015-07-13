@@ -104,12 +104,20 @@ Person.prototype.getBirthDate = function(){
   return this._data.BirthDate;
 };
 
+Person.prototype.getBirthDateDisplay = function(){
+  return getDateDisplayString(this.getBirthDate());
+};
+
 Person.prototype.getBirthLocation = function(){
   return this._data.BirthLocation;
 };
 
 Person.prototype.getDeathDate = function(){
   return this._data.DeathDate;
+};
+
+Person.prototype.getDeathDateDisplay = function(){
+  return getDateDisplayString(this.getDeathDate());
 };
 
 Person.prototype.getDeathLocation = function(){
@@ -233,6 +241,50 @@ Person.prototype.setFather = function(person){
  */
 Person.prototype.setChildren = function(children){
   this._data.Children = children;
+};
+
+/**
+ * Convert a raw date string from the API into a human readable string
+ */
+var months = [
+  'January',
+  'Februrary',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December'
+];
+function getDateDisplayString(raw){
+  if(!raw || !(/\d{4}-\d{2}-\d{2}/.test(raw)) ||  raw === '0000-00-00'){
+    return '';
+  }
+  
+  var date = new Date(raw);
+  
+  // If the date is invalid it means that the day and possibly also
+  // the month are "00". We know the year is not "0000" because we
+  // tested for that above.
+  if(isNaN(date.getTime())){
+    var parts = raw.split('-'),
+        year = parts[0],
+        month = parts[1],
+        monthInt = parseInt(month, 10);
+    if(monthInt === 0){
+      return year;
+    }
+    return months[monthInt - 1] + ' ' + year;
+  } 
+  
+  // Valid JS date so formatting is easy
+  else {
+    return months[date.getMonth()] + ' ' + date.getDate() + ', ' + date.getFullYear();
+  }
 };
 },{"./wikitree":5}],3:[function(require,module,exports){
 var wikitree = require('./wikitree'),

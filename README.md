@@ -70,11 +70,15 @@ __getDisplayName()__ - First name and last name.
 
 __getGender()__
 
-__getBirthDate()__
+__getBirthDate()__ - Birth date in 'YYYY-MM-DD' format
+
+__getBirthDateDisplay()__ - Birth date in human readable format; 'October 14, 1939'
 
 __getBirthLocation()__
 
-__getDeathDate()__
+__getDeathDate()__ - Death date in 'YYYY-MM-DD' format
+
+__getDeathDateDisplay()__ - Death date in human readable format; 'October 14, 1939'
 
 __getDeathLocation()__
 
