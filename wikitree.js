@@ -283,7 +283,7 @@ function getDateDisplayString(raw){
   
   // Valid JS date so formatting is easy
   else {
-    return months[date.getMonth()] + ' ' + date.getDate() + ', ' + date.getFullYear();
+    return months[date.getMonth()] + ' ' + date.getUTCDate() + ', ' + date.getFullYear();
   }
 };
 },{"./wikitree":5}],3:[function(require,module,exports){
