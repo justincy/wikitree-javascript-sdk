@@ -34,6 +34,13 @@ Javascript library to work with the WikiTree API functions.
 		
 	});
 	
+	// Get multiple persons and their relatives. Specify whether you want
+	// their parents, spouses, children, and or siblings returned.
+	// Returns a map of person objects keyed by the requested IDs.
+	wikitree.getPerson(ids, parents, spouses, children, siblings).then(function(persons){
+		
+	});
+	
 	// Get a user's watchlist
 	wikitree.getWatchlist().then(function(watchlist){
 	
@@ -86,7 +93,11 @@ __getFather()__ - Returns a Person object for the father, if available.
 
 __getMother()__ - Returns a Person object for the mother, if available.
 
-__getChildren()__ - Returns an array of Person objects for the children.
+__getChildren()__ - Returns a map of Person objects for the children keyed by ID. Returns undefined if no children have been requested. Returns an empty object if there are no children.
+
+__getSpouses()__ - Returns a map of Person objects for the spouses keyed by ID. Returns undefined if no spouses have been requested. Returns an empty object if there are no spouses.
+
+__getSiblings()__ - Returns a map of Person objects for the siblings keyed by ID. Returns undefined if no siblings have been requested. Returns an empty object if there are no siblings.
 
 __isLiving()__ - Returns `true` or `false`.
 
