@@ -540,10 +540,10 @@ wikitree.getRelatives = function(ids, parents, spouses, children, siblings){
   var data = {
     action: 'getRelatives',
     keys: ids.join(','),
-    getParents: parents === true,
-    getSpouses: spouses === true,
-    getChildren: children === true,
-    getSiblings: siblings === true,
+    getParents: parents === true ? 1 : 0,
+    getSpouses: spouses === true ? 1 : 0,
+    getChildren: children === true ? 1 : 0,
+    getSiblings: siblings === true ? 1 : 0,
   };
   return wikitree._ajax(data, function(response){
     var items = response[0].items,

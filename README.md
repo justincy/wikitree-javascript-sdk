@@ -37,7 +37,7 @@ Javascript library to work with the WikiTree API functions.
 	// Get multiple persons and their relatives. Specify whether you want
 	// their parents, spouses, children, and or siblings returned.
 	// Returns a map of person objects keyed by the requested IDs.
-	wikitree.getPerson(ids, parents, spouses, children, siblings).then(function(persons){
+	wikitree.getRelatives(ids, parents, spouses, children, siblings).then(function(persons){
 		
 	});
 	
