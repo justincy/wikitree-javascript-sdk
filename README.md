@@ -97,6 +97,8 @@ __getChildren()__ - Returns a map of Person objects for the children keyed by ID
 
 __getSpouses()__ - Returns a map of Person objects for the spouses keyed by ID. Returns undefined if no spouses have been requested. Returns an empty object if there are no spouses.
 
+__getSpouse()__ - Returns the first spouse in the list of spouses. Returns undefined if no spouses are available.
+
 __getSiblings()__ - Returns a map of Person objects for the siblings keyed by ID. Returns undefined if no siblings have been requested. Returns an empty object if there are no siblings.
 
 __isLiving()__ - Returns `true` or `false`.

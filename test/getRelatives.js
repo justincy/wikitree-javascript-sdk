@@ -3,7 +3,7 @@ require('./setup');
 var wikitree = require('./../lib/wikitree'),
     expect = require('chai').expect;
     
-describe.only('getRelatives', function(){
+describe('getRelatives', function(){
   
   it('basic', function(done){
     wikitree.getRelatives(['10147690'], true, true).then(function(persons){
@@ -16,6 +16,8 @@ describe.only('getRelatives', function(){
         expect(person.getChildren()).to.not.exist;
         expect(person.getSiblings()).to.not.exist;
         expect(person.getSpouses()).to.have.all.keys(['10147689']);
+        expect(person.getSpouse()).to.be.instanceof(wikitree.Person);
+        expect(person.getSpouse().getDisplayName()).to.equal('Albert John Zierak');
         expect(person.getFirstName()).to.equal('Mary');
         expect(person.getLastNameCurrent()).to.equal('Wojnowski');
         expect(person.getGender()).to.equal('Female');

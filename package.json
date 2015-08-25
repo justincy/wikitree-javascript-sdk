@@ -1,6 +1,6 @@
 {
   "name": "wikitree-javascript-sdk",
-  "version": "0.1.2",
+  "version": "0.1.4",
   "description": "JavaScript SDK for the WikiTree API",
   "main": "wikitree.js",
   "scripts": {
