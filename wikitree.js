@@ -72,14 +72,15 @@ var wikitree = require('./wikitree');
  */
 var Person = wikitree.Person = function(data){
   this._data = data;
-  if(data.Parents){
-    for(var p in data.Parents){
-      this._data.Parents[p] = new Person(data.Parents[p]);
-    }
-  }
-  if(data.Children){
-    for(var c in data.Children){
-      this._data.Children[c] = new Person(data.Children[c]);
+  
+  // Create person objects for any attached family members
+  var relatives = ['Parents', 'Spouses', 'Children', 'Siblings'];
+  for(var i = 0; i < relatives.length; i++){
+    var type = relatives[i];
+    if(data[type]){
+      for(var p in data[type]){
+        this._data[type][p] = new Person(data[type][p]);
+      }
     }
   }
 };
@@ -132,7 +133,7 @@ Person.prototype.getFather = function(){
 
 Person.prototype.getFatherId = function(){
   return this._data.Father;
-}
+};
 
 Person.prototype.getMother = function(){
   if(this._data.Mother && this._data.Parents){
@@ -142,10 +143,18 @@ Person.prototype.getMother = function(){
 
 Person.prototype.getMotherId = function(){
   return this._data.Mother;
-}
+};
 
 Person.prototype.getChildren = function(){
   return this._data.Children;
+};
+
+Person.prototype.getSpouses = function(){
+  return this._data.Spouses;
+};
+
+Person.prototype.getSiblings= function(){
+  return this._data.Siblings;
 };
 
 Person.prototype.getId = function(){
@@ -524,6 +533,30 @@ wikitree.getAncestors = function(id, depth){
 };
 
 /**
+ * Get a list of persons and their relatives. Returns a map keyed
+ * by the requested ID.
+ */
+wikitree.getRelatives = function(ids, parents, spouses, children, siblings){
+  var data = {
+    action: 'getRelatives',
+    keys: ids.join(','),
+    getParents: parents === true,
+    getSpouses: spouses === true,
+    getChildren: children === true,
+    getSiblings: siblings === true,
+  };
+  return wikitree._ajax(data, function(response){
+    var items = response[0].items,
+        persons = {};
+    for(var i = 0; i < items.length; i++){
+      var item = items[i];
+      persons[item.key] = new wikitree.Person(item.person);
+    }
+    return persons;
+  });
+};
+
+/**
  * Perform an ajax request to the API.
  * Return a promise
  */
@@ -552,6 +585,7 @@ wikitree._ajax = function(opts, success){
     dataType: 'json',
     data: opts
   }).then(function(response){
+    
     // If the success param is called then we're using the shortcut
     // version which globalizes error handling.
     if(success){
