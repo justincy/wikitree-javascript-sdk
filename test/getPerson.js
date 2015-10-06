@@ -16,6 +16,7 @@ describe('getPerson', function(){
         expect(person.getChildren()).to.have.all.keys(['10147688','10147705']);
         expect(person.getFirstName()).to.equal('Mary');
         expect(person.getLastNameCurrent()).to.equal('Zierak');
+        expect(person.getLastNameAtBirth()).to.equal('Wojnowski');
         expect(person.getGender()).to.equal('Female');
         expect(person.getBirthDate()).to.equal('1863-00-00');
         expect(person.getBirthDateDisplay()).to.equal('1863');
