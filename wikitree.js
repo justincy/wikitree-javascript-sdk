@@ -89,6 +89,10 @@ Person.prototype.getFirstName = function(){
   return this._data.FirstName;
 };
 
+Person.prototype.getMiddleName = function(){
+  return this._data.MiddleName;
+};
+
 Person.prototype.getLastNameCurrent = function(){
   return this._data.LastNameCurrent;
 };

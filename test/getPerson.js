@@ -15,6 +15,7 @@ describe('getPerson', function(){
         expect(person.getFather()).to.be.instanceof(wikitree.Person);
         expect(person.getChildren()).to.have.all.keys(['10147688','10147705']);
         expect(person.getFirstName()).to.equal('Mary');
+        expect(person.getMiddleName()).to.equal('');
         expect(person.getLastNameCurrent()).to.equal('Zierak');
         expect(person.getLastNameAtBirth()).to.equal('Wojnowski');
         expect(person.getGender()).to.equal('Female');
