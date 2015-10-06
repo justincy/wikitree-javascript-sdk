@@ -264,7 +264,7 @@ Person.prototype.setChildren = function(children){
  */
 var months = [
   'January',
-  'Februrary',
+  'February',
   'March',
   'April',
   'May',
