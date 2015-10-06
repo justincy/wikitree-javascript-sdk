@@ -73,6 +73,8 @@ __getFirstName()__
 
 __getLastNameCurrent()__
 
+__getLongNamePrivate()__
+
 __getDisplayName()__ - First name and last name.
 
 __getGender()__

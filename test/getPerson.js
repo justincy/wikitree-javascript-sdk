@@ -9,12 +9,13 @@ describe('getPerson', function(){
     wikitree.getPerson('10147690').then(function(person){
       check(done, function(){
         expect(person).to.be.instanceof(wikitree.Person);
-        expect(person.getDisplayName()).to.equal("Mary Wojnowski");
+        expect(person.getDisplayName()).to.equal("Mary Zierak");
+        expect(person.getLongNamePrivate()).to.equal('Mary (Wojnowski) Zierak');
         expect(person.getMother()).to.be.instanceof(wikitree.Person);
         expect(person.getFather()).to.be.instanceof(wikitree.Person);
         expect(person.getChildren()).to.have.all.keys(['10147688','10147705']);
         expect(person.getFirstName()).to.equal('Mary');
-        expect(person.getLastNameCurrent()).to.equal('Wojnowski');
+        expect(person.getLastNameCurrent()).to.equal('Zierak');
         expect(person.getGender()).to.equal('Female');
         expect(person.getBirthDate()).to.equal('1863-00-00');
         expect(person.getBirthDateDisplay()).to.equal('1863');

@@ -8,7 +8,7 @@ module.exports = function(opts){
                 "FirstName": "Mary",
                 "MiddleName": "",
                 "LastNameAtBirth": "Wojnowski",
-                "LastNameCurrent": "Wojnowski",
+                "LastNameCurrent": "Zierak",
                 "Nicknames": "",
                 "LastNameOther": "",
                 "RealName": "Mary",
@@ -25,7 +25,7 @@ module.exports = function(opts){
                 "Mother": "10147704",
                 "ShortName": "Mary Wojnowski",
                 "BirthNamePrivate": "Mary Wojnowski",
-                "LongNamePrivate": "Mary Wojnowski",
+                "LongNamePrivate": "Mary (Wojnowski) Zierak",
                 "Parents": {
                     "10147702": {
                         "Id": 10147702,

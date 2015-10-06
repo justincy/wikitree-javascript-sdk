@@ -97,6 +97,10 @@ Person.prototype.getDisplayName = function(){
   return this.getFirstName() + ' ' + this.getLastNameCurrent();
 };
 
+Person.prototype.getLongNamePrivate = function(){
+  return this._data.LongNamePrivate;
+};
+
 Person.prototype.getGender = function(){
   return this._data.Gender;
 };
