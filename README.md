@@ -71,7 +71,11 @@ available API functions and parameters.
 
 __getFirstName()__
 
+__getMiddleName()__
+
 __getLastNameCurrent()__
+
+__getLastNameAtBirth()__
 
 __getLongNamePrivate()__
 
