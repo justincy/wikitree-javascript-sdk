@@ -2,6 +2,7 @@ module.exports = function(opts){
     if(opts.limit === 1){
         return [
             {
+                "watchlistCount": 52,
                 "watchlist": [
                     {
                         "Id": "10128682",
@@ -43,6 +44,7 @@ module.exports = function(opts){
     } else {
         return [
             {
+                "watchlistCount": 52,
                 "watchlist": [
                     {
                         "Id": "10128682",

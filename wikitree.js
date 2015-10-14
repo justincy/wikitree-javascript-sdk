@@ -479,7 +479,10 @@ wikitree.getWatchlist = function(params){
     utils.each(response[0].watchlist, function(person, i){
       persons.push(new wikitree.Person(person));
     });
-    return persons;
+    return {
+      list: persons,
+      total: response[0].watchlistCount
+    };
   });
 };
 

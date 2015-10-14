@@ -6,18 +6,20 @@ var wikitree = require('./../lib/wikitree'),
 describe('getWatchlist', function(){
   
   it('basic', function(done){
-    wikitree.getWatchlist().done(function(watchlist){
+    wikitree.getWatchlist().done(function(response){
       check(done, function(){
-        expect(watchlist).to.have.length(3);
-        expect(watchlist[0]).to.be.instanceof(wikitree.Person);
+        expect(response.list).to.have.length(3);
+        expect(response.total).to.equal(52);
+        expect(response.list[0]).to.be.instanceof(wikitree.Person);
       });
     });
   });
   
   it('with params', function(done){
-    wikitree.getWatchlist({limit:1}).done(function(watchlist){
+    wikitree.getWatchlist({limit:1}).done(function(response){
       check(done, function(){
-        expect(watchlist).to.have.length(1);
+        expect(response.list).to.have.length(1);
+        expect(response.total).to.equal(52);
       });
     });
   });

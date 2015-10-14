@@ -42,7 +42,7 @@ Javascript library to work with the WikiTree API functions.
 	});
 	
 	// Get a user's watchlist
-	wikitree.getWatchlist().then(function(watchlist){
+	wikitree.getWatchlist().then(function({ list, total }){
 	
 	});
 	
