@@ -97,8 +97,8 @@ logged_in {
 // In the ready() function we run some code when the DOM is ready to go.
 $(document).ready(function(){ 
 
-	wikitree.checkLogin({})
-		.then(function(data) { 
+	wikitree.checkLogin()
+		.then(function() { 
 			if (wikitree.session.loggedIn) { 
 				$('#need_login').hide();
 				$('#logged_in').show();
@@ -117,7 +117,9 @@ function tryLogin() {
 			if (wikitree.session.loggedIn) { 
 				$('#need_login').hide();
 				$('#logged_in').show();
-				walk(wikitree.session.user_id);
+				$('.user_name_label').text(wikitree.session.user_name);
+				$('.user_id_label').text(wikitree.session.user_id);
+				walk();
 			} else { 
 				alert("Login failed.");
 			}
@@ -125,17 +127,16 @@ function tryLogin() {
 }
 
 // Given a user id, "walk" that user by retrieving their data and sticking it into the page.
-function walk(user_id) { 
+function walk(personId) { 
 
-	// If we don't have a user_id, use the one from the cookie (the one for the logged-in user).
-	if (!user_id) { 
-		user_id = $.cookie('wikitree_wtb_UserID');
+	if(!personId){
+		personId = wikitree.session.user_id;
 	}
 
 	// Go get the person data. 
-  var fields = 'Id,Name,FirstName,MiddleName,LastNameAtBirth,LastNameCurrent,BirthDate,DeathDate,Father,Mother,Parents,Children';
-	wikitree.getPerson(user_id, fields)
-    .done(function(person){;
+  var fields = ['Id','Name','FirstName','MiddleName','LastNameAtBirth','LastNameCurrent','BirthDate','DeathDate','Father','Mother','Parents','Children'];
+	wikitree.getPerson(personId, fields).done(function(person){
+		
       // Raw JSON results dumped to display div
       $('#raw').html("<h2>Raw Results</h2>\n<pre>"+JSON.stringify(person, null, 4)+"</pre>");
 
@@ -162,7 +163,7 @@ function walk(user_id) {
       if (children) { 
         for(var c in children) { 
           var child = children[c];
-          $('#walk_children').append("<span class='pseudo_link' onClick='walk("+child.getId()+");'>"+child.getDisplayName()+"</span>");
+          $('#walk_children').append("<span class='pseudo_link' onClick='walk("+child.getId()+");'>"+child.getDisplayName()+"</span><br>");
         }
       }
 
