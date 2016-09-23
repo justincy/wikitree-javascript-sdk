@@ -65,7 +65,8 @@ wikitree.removePersonFSConnection = function(wikiId, fsId){
   });
 };
 },{"./wikitree":5}],2:[function(require,module,exports){
-var wikitree = require('./wikitree');
+var wikitree = require('./wikitree'),
+    utils = require('./utils');
 
 /**
  * Create a person from the given `user_id`
@@ -122,7 +123,7 @@ Person.prototype.getBirthDate = function(){
 };
 
 Person.prototype.getBirthDateDisplay = function(){
-  return getDateDisplayString(this.getBirthDate());
+  return utils.getDateDisplayString(this.getBirthDate());
 };
 
 Person.prototype.getBirthLocation = function(){
@@ -134,7 +135,7 @@ Person.prototype.getDeathDate = function(){
 };
 
 Person.prototype.getDeathDateDisplay = function(){
-  return getDateDisplayString(this.getDeathDate());
+  return utils.getDateDisplayString(this.getDeathDate());
 };
 
 Person.prototype.getDeathLocation = function(){
@@ -278,51 +279,7 @@ Person.prototype.setFather = function(person){
 Person.prototype.setChildren = function(children){
   this._data.Children = children;
 };
-
-/**
- * Convert a raw date string from the API into a human readable string
- */
-var months = [
-  'January',
-  'February',
-  'March',
-  'April',
-  'May',
-  'June',
-  'July',
-  'August',
-  'September',
-  'October',
-  'November',
-  'December'
-];
-function getDateDisplayString(raw){
-  if(!raw || !(/\d{4}-\d{2}-\d{2}/.test(raw)) ||  raw === '0000-00-00'){
-    return '';
-  }
-  
-  var date = new Date(raw);
-  
-  // If the date is invalid it means that the day and possibly also
-  // the month are "00". We know the year is not "0000" because we
-  // tested for that above.
-  if(isNaN(date.getTime())){
-    var parts = raw.split('-'),
-        year = parts[0],
-        month = parts[1],
-        monthInt = parseInt(month, 10);
-    if(monthInt === 0){
-      return year;
-    }
-    return months[monthInt - 1] + ' ' + year;
-  } 
-  
-  // Valid JS date so formatting is easy
-  else {
-    return months[date.getMonth()] + ' ' + date.getUTCDate() + ', ' + date.getFullYear();
-  }
-};
-},{"./wikitree":5}],3:[function(require,module,exports){
+},{"./utils":4,"./wikitree":5}],3:[function(require,module,exports){
 var wikitree = require('./wikitree'),
     cookies = require('mozilla-doc-cookies');
 
@@ -440,6 +397,48 @@ utils.each = function(obj, iterator, context) {
     }
   }
   return obj;
+};
+
+/**
+ * Convert a raw date string from the API into a human readable string
+ */
+var months = [
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December'
+];
+utils.getDateDisplayString = function(raw){
+  
+  if(!raw || !(/\d{4}-\d{2}-\d{2}/.test(raw)) ||  raw === '0000-00-00'){
+    return '';
+  }
+  
+  // At this point we know that the year is not empty so we just have to
+  // check the month and the day
+  var parts = raw.split('-'),
+      year = parts[0],
+      month = parts[1],
+      day = parts[2],
+      monthInt = parseInt(month, 10);
+  
+  if(month === '00'){
+    return year;
+  }
+  
+  if(day === '00'){
+    return months[monthInt - 1] + ' ' + year;
+  }
+  
+  return months[monthInt - 1] + ' ' + parseInt(day, 10) + ', ' + year;
 };
 },{}],5:[function(require,module,exports){
 var utils = require('./utils');
